@@ -28,9 +28,11 @@ namespace ConvertSqliteToMSSQL
                         string AUTOINCREMENT_key = GetBetweenAsString(line, "PRIMARY KEY(\"", "\" AUTOINCREMENT)", false);
                         string AUTOINCREMENT_type = GetBetweenAsString(line, "	\"" + AUTOINCREMENT_key + '"', "\n", false).Trim();
 
-                        string newline = line.Replace(AUTOINCREMENT_type, AUTOINCREMENT_type.Replace(",", " IDENTITY(1,1),"));
-
-                        text = text.Replace(line, newline + "\n");
+                        if (AUTOINCREMENT_type != "")
+                        {
+                            string newline = line.Replace(AUTOINCREMENT_type, AUTOINCREMENT_type.Replace(",", " IDENTITY(1,1),"));
+                            text = text.Replace(line, newline + "\n");
+                        }
 
                     }
 
@@ -101,13 +103,29 @@ namespace ConvertSqliteToMSSQL
                     */
 
                 }
-
-                catch (IOException)
+                catch (Exception)
                 {
-                    throw;
+                    //throw; //add to debug
                 }
             }
+
             richTextBox1.Text = output; // <-- Shows file size in debugging mode.
+        }
+
+        public static string GetBetweenAsStringInWorkProgress(string data, string start, string end, bool include_start_end = false)
+        {
+            string FinalString;
+            int Pos1 = data.IndexOf(start) + start.Length;
+            int Pos2 = data.IndexOf(end);
+            if (Pos1 > Pos2 || Pos2 <= 0) {
+                return "";
+            }
+            FinalString = data.Substring(Pos1, Pos2 - Pos1);
+            if (include_start_end == true)
+            {
+                return start + FinalString + end;
+            }
+            return FinalString;
         }
 
         private static string GetBetweenAsString(string data, string start, string end, bool include_start_end = false)
